@@ -63,24 +63,23 @@ def load_llm():
     return llm
 
 def query_agent(llm, tools, input):
+    
+    import re
+    
     custom_prompt = """
-    You are an intelligent agent that answers queries by following a strict chain-of-thought format.
-    For every step, please output your reasoning and your tool calls using exactly the following structure:
-
-    Thought: <Your internal reasoning for this step.>
-    Action: <The tool name you want to use (or output "None" if no tool is used).>
-    Action Input: <The JSON input to pass to the tool (or "{}" if no tool is used).>
-
-    When you are ready to provide your final answer, output only:
+    You are an intelligent agent that uses chain-of-thought reasoning internally but must output only one final answer.
+    
+    When you are ready, output exactly one line in the following format and nothing else:
     Answer: <Your final answer here.>
-
-    Do not output any extra text or commentary outside of this structure.
     """
-
+    
     from llama_index.core.agent import ReActAgent
-
-    agent = ReActAgent.from_tools(tools, llm=llm, verbose=True, prompt_template=custom_prompt)
-
+    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, prompt_template=custom_prompt)
     response = agent.chat(input)
     
+    # Post-process: extract only the final answer line
+    match = re.search(r"Answer:\s*(.*)", response, flags=re.DOTALL)
+    if match:
+        final_answer = match.group(1).strip()
+        return final_answer
     return response
