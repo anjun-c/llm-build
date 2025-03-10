@@ -62,10 +62,16 @@ def load_llm():
 
     return llm
 
+def dummy_query_agent(llm, tools, input):
+    from llama_index.core.agent import ReActAgent
+    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False)
+
+    agent.chat(input)
+
 def query_agent(llm, tools, input):
-    
+
     import re
-    
+
     custom_prompt = """
     You are an intelligent agent that uses chain-of-thought reasoning internally but must output only one final answer.
     
@@ -76,10 +82,21 @@ def query_agent(llm, tools, input):
     from llama_index.core.agent import ReActAgent
     agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, prompt_template=custom_prompt)
     response = agent.chat(input)
+    print(f"Response is: {response}")
     
-    # Post-process: extract only the final answer line
-    match = re.search(r"Answer:\s*(.*)", response, flags=re.DOTALL)
+    # Convert response to string if needed
+    response_str = str(response)
+    
+    # Remove the chain-of-thought block enclosed in <think> ... </think>
+    cleaned = re.sub(r"<think>.*?</think>\s*", "", response_str, flags=re.DOTALL)
+    
+    # Extract the final answer line if it starts with "Answer:"
+    match = re.search(r"Answer:\s*(.*)", cleaned, flags=re.DOTALL)
     if match:
         final_answer = match.group(1).strip()
-        return final_answer
-    return response
+    else:
+        final_answer = cleaned.strip()
+    
+    print(f"Final answer is: {final_answer}")
+
+    return final_answer

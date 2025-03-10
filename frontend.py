@@ -11,6 +11,7 @@ if st.button("Submit"):
             # Send the query to the FastAPI endpoint
             res = requests.post("http://127.0.0.1:8001/query", json={"query": query_text})
             if res.status_code == 200:
+                print(res.json())
                 st.write("Agent Response:")
                 st.write(res.json()["response"])
             else:
