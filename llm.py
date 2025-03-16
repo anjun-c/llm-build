@@ -36,29 +36,29 @@ def load_tools(llm, index_set):
         for subject in subjects
     ]
 
-    from llama_index.core.query_engine import SubQuestionQueryEngine
+    # from llama_index.core.query_engine import SubQuestionQueryEngine
 
-    query_engine = SubQuestionQueryEngine.from_defaults(
-        query_engine_tools=individual_query_engine_tools,
-        llm=llm,
-    )
+    # query_engine = SubQuestionQueryEngine.from_defaults(
+    #     query_engine_tools=individual_query_engine_tools,
+    #     llm=llm,
+    # )
 
-    query_engine_tool = QueryEngineTool(
-        query_engine=query_engine,
-        metadata=ToolMetadata(
-            name="sub_question_query_engine",
-            description="useful for when you want to answer queries that require analyzing multiple subjects",
-        ),
-    )
+    # query_engine_tool = QueryEngineTool(
+    #     query_engine=query_engine,
+    #     metadata=ToolMetadata(
+    #         name="sub_question_query_engine",
+    #         description="useful for when you want to answer queries that require analyzing multiple subjects",
+    #     ),
+    # )
 
-    tools = individual_query_engine_tools + [query_engine_tool]
+    tools = individual_query_engine_tools # + [query_engine_tool]
 
     return tools
 
 def load_llm():
     from llama_index.llms.ollama import Ollama
 
-    llm = Ollama(model="deepseek-r1:8b", request_timeout=60)
+    llm = Ollama(model="llama2:7b", request_timeout=60)
 
     return llm
 
@@ -71,33 +71,17 @@ def load_agent(llm, tools):
     """
 
     from llama_index.core.agent import ReActAgent
-    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, custom_prompt=custom_prompt)
+    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, custom_prompt=custom_prompt, maximum_interactions=10)
 
     return agent
 
 
 def dummy_query_agent(llm, tools, agent, input):
     agent.chat(input)
+    # llm.complete(input)
 
 def query_agent(llm, tools, agent, input):
-    import re
     
     response = agent.chat(input)
-    print(f"Response is: {response}")
-    
-    # Convert response to string if needed
-    response_str = str(response)
-    
-    # Remove the chain-of-thought block enclosed in <think> ... </think>
-    cleaned = re.sub(r"<think>.*?</think>\s*", "", response_str, flags=re.DOTALL)
-    
-    # Extract the final answer line if it starts with "Answer:"
-    match = re.search(r"Answer:\s*(.*)", cleaned, flags=re.DOTALL)
-    if match:
-        final_answer = match.group(1).strip()
-    else:
-        final_answer = cleaned.strip()
-    
-    print(f"Final answer is: {final_answer}")
 
-    return final_answer
+    return response

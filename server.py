@@ -16,9 +16,9 @@ tools = load_tools(llm, index_set)
 print("Loaded tools")
 agent = load_agent(llm, tools)
 print("Loaded agent")
-dummy_query_agent(llm, tools, input="dummy query")
+dummy_query_agent(llm, tools, agent, input="dummy query")
 print("Completed dummy query 1")
-dummy_query_agent(llm, tools, input="dummy query")
+dummy_query_agent(llm, tools, agent, input="dummy query")
 print("Completed dummy query 2")
 
 # Create the FastAPI application
@@ -35,7 +35,7 @@ async def read_root():
 @app.post("/query")
 async def query_endpoint(request: QueryRequest):
     # Process the query using your query_agent function
-    response = query_agent(llm, tools, request.query)
+    response = query_agent(llm, tools, agent, request.query)
     return {"response": response}
 
 # Function to start the FastAPI server (using uvicorn)
