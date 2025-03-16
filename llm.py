@@ -58,29 +58,30 @@ def load_tools(llm, index_set):
 def load_llm():
     from llama_index.llms.ollama import Ollama
 
-    llm = Ollama(model="deepseek-r1:8b")
+    llm = Ollama(model="deepseek-r1:8b", request_timeout=60)
 
     return llm
 
-def dummy_query_agent(llm, tools, input):
-    from llama_index.core.agent import ReActAgent
-    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False)
-
-    agent.chat(input)
-
-def query_agent(llm, tools, input):
-
-    import re
-
+def load_agent(llm, tools):
     custom_prompt = """
     You are an intelligent agent that uses chain-of-thought reasoning internally but must output only one final answer.
     
     When you are ready, output exactly one line in the following format and nothing else:
     Answer: <Your final answer here.>
     """
-    
+
     from llama_index.core.agent import ReActAgent
-    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, prompt_template=custom_prompt)
+    agent = ReActAgent.from_tools(tools, llm=llm, verbose=False, custom_prompt=custom_prompt)
+
+    return agent
+
+
+def dummy_query_agent(llm, tools, agent, input):
+    agent.chat(input)
+
+def query_agent(llm, tools, agent, input):
+    import re
+    
     response = agent.chat(input)
     print(f"Response is: {response}")
     

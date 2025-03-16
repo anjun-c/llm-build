@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 # Import your functions from llm.py
-from llm import load_llm, load_indices_tools, load_tools, query_agent, dummy_query_agent
+from llm import load_llm, load_indices_tools, load_tools, query_agent, load_agent, dummy_query_agent
 
 # Initialize LLM, load indices and tools
 llm = load_llm()
@@ -14,6 +14,8 @@ index_set = load_indices_tools()
 print("Loaded indices")
 tools = load_tools(llm, index_set)
 print("Loaded tools")
+agent = load_agent(llm, tools)
+print("Loaded agent")
 dummy_query_agent(llm, tools, input="dummy query")
 print("Completed dummy query 1")
 dummy_query_agent(llm, tools, input="dummy query")
