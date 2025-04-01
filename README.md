@@ -1,3 +1,1 @@
-- fix timeout issue with ollama (change environment variable)
-- try using different models without COT like llama3.1
-- fix the parsing
+- move to langchain
