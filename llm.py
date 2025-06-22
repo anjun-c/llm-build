@@ -58,7 +58,7 @@ def load_tools(llm, index_set):
 def load_llm():
     from llama_index.llms.ollama import Ollama
 
-    llm = Ollama(model="llama3.1:latest", request_timeout=60)
+    llm = Ollama(model="tinyllama:latest", request_timeout=60)
 
     return llm
 
