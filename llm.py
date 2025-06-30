@@ -24,17 +24,33 @@ def load_indices_tools():
 def load_tools(llm, index_set):
     # Load tools
     from llama_index.core.tools import QueryEngineTool, ToolMetadata
+    from llama_index.core.response_synthesizers import get_response_synthesizer
 
-    individual_query_engine_tools = [
-        QueryEngineTool(
-            query_engine=index_set[subject].as_query_engine(llm=llm),
+    individual_query_engine_tools = []
+    
+    for subject in subjects:
+        # Create a custom response synthesizer that includes source information
+        response_synthesizer = get_response_synthesizer(
+            response_mode="compact",
+            llm=llm,
+            use_async=False,
+        )
+        
+        query_engine = index_set[subject].as_query_engine(
+            llm=llm,
+            response_synthesizer=response_synthesizer,
+            similarity_top_k=3,
+            response_mode="compact",
+        )
+        
+        tool = QueryEngineTool(
+            query_engine=query_engine,
             metadata=ToolMetadata(
                 name=f"vector_index_{subject}",
-                description=f"useful for when you want to answer queries about the {subject} subject",
+                description=f"useful for when you want to answer queries about the {subject} subject. This tool will return both the answer and the source document information including document names.",
             ),
         )
-        for subject in subjects
-    ]
+        individual_query_engine_tools.append(tool)
 
     # from llama_index.core.query_engine import SubQuestionQueryEngine
 
@@ -72,8 +88,11 @@ def load_agent(llm, tools):
     If your tool queries do not yield relevant results after a few attempts, then provide an answer based solely on your general knowledge.
     You can ask clarifying questions if you need more information to answer a question, and you may ask up to 20 clarifying questions.
 
+    IMPORTANT: When you use vector index tools and they return information, you MUST include the source document information in your response. 
+    Always mention which document(s) the information came from by including the document name/subject in your answer.
+
     When you are ready, output exactly in the following format and nothing else:
-    Answer: <Your final answer here.>
+    Answer: <Your final answer here.> [Source: <document name/subject>]
     """
 
 

@@ -30,7 +30,7 @@ class QueryRequest(BaseModel):
 
 @app.get("/")
 async def read_root():
-    return {"message": "Welcome to the LlamaIndex query agent API"}
+    return {"message": "Welcome to the query agent API"}
 
 @app.post("/query")
 async def query_endpoint(request: QueryRequest):
